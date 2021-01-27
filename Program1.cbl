@@ -64,9 +64,9 @@
 
 
        01 ws-report-heading.
-         05 filler                 pic x(142)    value spaces.
-         05 filler                 pic x(18)     value 
-         "Kaifkhan Vakil, A2".
+         05 filler                 pic x(84)    value spaces.
+         05 filler                 pic x(28)     value 
+         "Kaifkhan Vakil, Assignment 2".
          05 filler                 pic x(10)     value spaces.
 
 
@@ -75,68 +75,44 @@
       *will show the column heading and what the details it will be 
       *showing
 
-       01 ws-column-heading.
-         05 filler                 pic x(11)     value "Item Number".
-         05 filler                 pic x(2)      value spaces.
-         05 filler                 pic x(2)      value spaces.
-         05 filler                 pic x(11)     value "Description".
-         05 filler                 pic x(6)      value spaces.
-         05 filler                 pic x(3)      value "Qty".
-         05 filler                 pic x(5)      value spaces.
-         05 filler                 pic x(14)     value "Price per unit".
-         05 filler                 pic x(6)      value spaces.
-         05 filler                 pic x(15)     value "Extended Price".
-         05 filler                 pic x(2)      value spaces.
-         05 filler                 pic x(17)     value 
-         "Discounted Amount".
-         05 filler                 pic x(3)      value spaces.
-         05 filler                 pic x(9)      value "Net price".
-         05 filler                 pic x(3)      value spaces.
-         05 filler                 pic x(13)     value "Product Class".
-         05 filler                 pic x(2)      value spaces.
-         05 filler                 pic x(16)     value 
-         "Transportation %".
-         05 filler                 pic x(3)      value spaces.
-         05 filler                 pic x(21)     value 
-         "Transportation Charge".
-
        01 ws-title-1.
          05 filler                 pic x(50)     value 
-         " ITEM     ITEM           EXTENDED         DICOUNT      ".
-         05 filler                 pic x(40)     value 
-         "NET PRICE  CLASS  TRANS   TRANSPORTATION".
+         " ITEM     ITEM       Qty    UNIT       EXTENDED".
+         05 filler                 pic x(61)     value 
+         
+       "       DISCOUNT      NET PRICE  CLASS  TRANS   TRANSPORTATION".
 
        01 ws-title-2.
-         05 filler                 pic x(50)     value 
-        "     DESCRIPTION               PRICE          AMOUNT        ".
-         05 filler                 pic x(40)     value 
-         "                    %          CHARGE      ".
+         05 filler                 pic x(58)     value 
+        "  #    DESCRIPTION          PRICE       PRICE             ".
+         05 filler                 pic x(55)     value 
+         "AMOUNT                          %          CHARGE    ".
 
       *****************************************************************
       *This is the detail line section which takes care of outputting 
       *data which has been gotten from the input file.
 
        01 ws-detail-line.
-         05 filler                 pic x(3).
+         05 filler                 pic x(1).
          05 ws-item-number         pic x(4).
-         05 filler                 pic x(8).
+         05 filler                 pic x(2).
          05 ws-description         pic x(13).
-         05 filler                 pic x(5)      value spaces.
+         05 filler                 pic x(1)      value spaces.
          05 ws-quantity            pic zz9.
-         05 filler                 pic x(7)      value spaces.
+         05 filler                 pic x(2)      value spaces.
          05 ws-unit-price          pic z,zz9.99.
-         05 filler                 pic x(10)     value spaces.
+         05 filler                 pic x(2)     value spaces.
          05 ws-extended-price      pic z,zzz,zz9.99.
          05 filler                 pic x(6)      value spaces.
          05 ws-discounted-price    pic zzz,zz9.99.
-         05 filler                 pic x(6)      value spaces.
+         05 filler                 pic x(4)      value spaces.
          05 ws-net-price           pic z,zzz,zz9.99.
-         05 filler                 pic x(9)     value spaces.
+         05 filler                 pic x(4)      value spaces.
          05 ws-product-class       pic x(1).
-         05 filler                 pic x(12)      value spaces.
+         05 filler                 pic x(4)     value spaces.
          05 ws-trans-percent       pic z9.9.
          05 ws-percent-sign        pic x.
-         05 filler                 pic x(10)      value spaces.
+         05 filler                 pic x(5)     value spaces.
          05 ws-trans-charge        pic z,zzz,zz9.99.
          
       *****************************************************************
@@ -144,11 +120,11 @@
       *extended, net and tranportation price
 
        01 ws-summary-line.
-         05 filler                 pic x(59)     value spaces.
+         05 filler                 pic x(34)     value spaces.
          05 ws-total-extended      pic $$$,$$$,$$9.99.
-         05 filler                 pic x(21)     value spaces.
+         05 filler                 pic x(18)     value spaces.
          05 ws-total-net           pic $$$,$$$,$$9.99.
-         05 filler                 pic x(35)     value spaces.
+         05 filler                 pic x(17)     value spaces.
          05 ws-total-trans-charge  pic $$$,$$$,$$9.99.
 
       *****************************************************************
@@ -167,11 +143,11 @@
       * if we want to use that count for calculation later.
 
        01 ws-counters.
-         05 ws-price-count     pic 9(9)v99       value 0.
-         05 ws-net-count       pic 9(9)v99       value 0.
-         05 ws-charge-count    pic 9(9)v99       value 0.
-         05 ws-discount-count  pic 999           value 0.
-         05 ws-total-items     pic 999           value 0.
+         05 ws-price-count        pic 9(9)v99    value 0.
+         05 ws-net-count          pic 9(9)v99    value 0.
+         05 ws-charge-count       pic 9(9)v99    value 0.
+         05 ws-discount-count     pic 999        value 0.
+         05 ws-total-items        pic 999        value 0.
 
       *****************************************************************
       *This section is solely for the purpose of calculation,first we 
@@ -248,12 +224,12 @@
       *I am using paragraph inside my paragraph just to make my code 
       *look nice and clean and to suppress the amount of errors.
 
-           move 0 to ws-extended-calc.
-           move 0 to ws-discount-calc.
-           move 0 to ws-net-price-calc.
-           move 0 to ws-trans-per-calc.
-           move 45 to ws-trans-charge-calc.
-           add 1 to ws-total-items.
+           move 0      to ws-extended-calc.
+           move 0      to ws-discount-calc.
+           move 0      to ws-net-price-calc.
+           move 0      to ws-trans-per-calc.
+           move 45     to ws-trans-charge-calc.
+           add 1       to ws-total-items.
 
            perform 140-extended-price-calculation.
            perform 150-discount-calculation.
@@ -273,9 +249,10 @@
       *report heading
        020-write-headings.
            write output-line from ws-report-heading.
-
-           write output-line from ws-column-heading
-             after advancing 2 lines.
+           write output-line from ws-title-1
+           after advancing 2 lines.
+           write output-line from ws-title-2.
+      *   
 
       *initial read of input file
        030-read-input.
@@ -287,12 +264,12 @@
       *in this paragraph i am summing up the price of extended price, 
       *net price and transportation charge
        110-total-calculation.
-           move ws-price-count to ws-total-extended.
-           move ws-net-count to ws-total-net.
-           move ws-charge-count to ws-total-trans-charge.
+           move ws-price-count         to ws-total-extended.
+           move ws-net-count           to ws-total-net.
+           move ws-charge-count        to ws-total-trans-charge.
 
            write output-line from ws-summary-line
-             after advancing 2 lines.
+             after advancing 1 line.
 
       *In this paragraph i am calculating the number of items that got 
       *dicount on them and which did not and i am outputting percentage
@@ -300,8 +277,10 @@
        120-discount-total.
            divide ws-discount-count by ws-total-items
              giving ws-interim rounded.
+
            multiply ws-interim by ws-100
              giving ws-percent-dicount.
+
            move ws-percent-sign-cnst to ws-discount-sign.
 
            write output-line from ws-overall-discount
@@ -393,9 +372,9 @@
       *In this section we are adding to our extended price, net price 
       *and transportation charges so that can count its total later.
        190-count-prices.
-           add ws-extended-calc to ws-price-count.
-           add ws-net-price-calc to ws-net-count.
-           add ws-trans-charge-calc to ws-charge-count.
+           add ws-extended-calc        to ws-price-count.
+           add ws-net-price-calc       to ws-net-count.
+           add ws-trans-charge-calc    to ws-charge-count.
 
       *This section deals with the writting of detail line for our file.
        200-write-detail-line.
@@ -403,17 +382,17 @@
            move spaces to ws-detail-line.
            write output-line from ws-detail-line.
 
-           move il-item-number to ws-item-number.
-           move il-product-class to ws-product-class.
-           move il-description to ws-description.
-           move il-quantity to ws-quantity.
-           move il-unit-price to ws-unit-price.
-           move ws-extended-calc to ws-extended-price.
-           move ws-discount-calc to ws-discounted-price.
-           move ws-net-price-calc to ws-net-price.
-           move ws-trans-per-calc to ws-trans-percent.
-           move ws-percent-sign-cnst to ws-percent-sign.
-           move ws-trans-charge-calc to ws-trans-charge.
+           move il-item-number             to ws-item-number.
+           move il-product-class           to ws-product-class.
+           move il-description             to ws-description.
+           move il-quantity                to ws-quantity.
+           move il-unit-price              to ws-unit-price.
+           move ws-extended-calc           to ws-extended-price.
+           move ws-discount-calc           to ws-discounted-price.
+           move ws-net-price-calc          to ws-net-price.
+           move ws-trans-per-calc          to ws-trans-percent.
+           move ws-percent-sign-cnst       to ws-percent-sign.
+           move ws-trans-charge-calc       to ws-trans-charge.
 
            write output-line from ws-detail-line.
       *   
