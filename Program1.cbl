@@ -102,7 +102,8 @@
 
       *****************************************************************
       *This is the detail line section which takes care of outputting 
-      *data which has been gotten from the 
+      *data which has been gotten from the input file.
+
        01 ws-detail-line.
          05 filler                 pic x(3).
          05 ws-item-number         pic x(4).
@@ -126,6 +127,10 @@
          05 filler                 pic x(10)      value spaces.
          05 ws-trans-charge        pic zzz,zz9.99.
          
+      *****************************************************************
+      *This is the summary line which will be showing the total of 
+      *extended, net and tranportation price
+
        01 ws-summary-line.
          05 filler                 pic x(61)     value spaces.
          05 ws-total-extended      pic $$$,$$$,$$9.99.
@@ -134,6 +139,9 @@
          05 filler                 pic x(31)     value spaces.
          05 ws-total-trans-charge  pic $$$,$$$,$$9.99.
 
+      *****************************************************************
+      *This section takes care of showing the percentage amount of item 
+      *that got the discount on them and which dont.
        01 ws-overall-discount.
          05 ws-discount-total      pic x(22)     value 
        " ITEMS WITHOUT DICOUNT".
@@ -142,6 +150,10 @@
          05 ws-discount-sign       pic x.
 
 
+      *****************************************************************
+      *This section is for counting is used for calculation purposes and 
+      * if we want to use that count for calculation later.
+
        01 ws-counters.
          05 ws-price-count     pic 9(9)v99       value 0.
          05 ws-net-count       pic 9(9)v99       value 0.
@@ -149,14 +161,22 @@
          05 ws-discount-count  pic 999           value 0.
          05 ws-total-items     pic 999           value 0.
 
+      *****************************************************************
+      *This section is solely for the purpose of calculation,first we 
+      *will conduct calculation in this section then we will move it to 
+      *edited clause
 
-       01 ws-cals.
+       01 ws-calcs.
          05 ws-extended-calc       pic 9(8)v99   value 0.
          05 ws-discount-calc       pic 9(8)v99   value 0.
          05 ws-net-price-calc      pic 9(8)v99   value 0.
          05 ws-trans-per-calc      pic 999v9.
          05 ws-trans-charge-calc   pic 9(8)v99   value 0.
          05 ws-interim             pic 999v99    value 0.
+
+      *****************************************************************
+      *This section is of the constants, if those are used in the 
+      *calculation.
 
        01 ws-constants.
          05 ws-a-class             pic x         value "A".
@@ -168,58 +188,27 @@
          05 ws-g-class             pic x         value "G".
          05 ws-percent-sign-cnst   pic x         value "%".
 
-
-
-
+      *****************************************************************
+      *This is section for notifying us if we have reached end of line 
+      *while reading the input file.
        01 ws-flags.
          05 ws-eof-flag            pic x         value "n".
 
        procedure division.
 
        000-main.
-      *open files
-           open input input-file.
-           open output output-file.
-
-      *report heading
-
-           write output-line from ws-report-heading
-             after advancing 2 lines.
-
-           write output-line from ws-column-heading
-             after advancing 3 lines
-
-      *initial read of input file
-
-           read input-file
-               at end
-                   move "y" to ws-eof-flag.
+           perform 010-open-files.
+           perform 020-write-headings.
+           perform 030-read-input.
 
       *process each input record and read in the next record
 
            perform 100-process-file
              until ws-eof-flag equals "y".
 
-           move ws-price-count to ws-total-extended.
-           move ws-net-count to ws-total-net.
-           move ws-charge-count to ws-total-trans-charge.
-
-           write output-line from ws-summary-line
-           after advancing 2 lines.
-
-          divide ws-discount-count by ws-total-items
-            giving ws-interim rounded.
-           multiply ws-interim by 100
-             giving ws-percent-dicount.
-           move ws-percent-sign-cnst to ws-discount-sign.
-
-           write output-line from ws-overall-discount
-           after advancing 3 lines.
-
-      *Close files and end program
-           close input-file.
-           close output-file.
-
+           perform 110-total-calculation.
+           perform 120-discount-total.
+           perform 130-close-files.
 
            goback.
 
@@ -232,40 +221,96 @@
            move 45 to ws-trans-charge-calc.
            add 1 to ws-total-items.
 
-           multiply il-unit-price by il-quantity
-           giving ws-extended-calc rounded.
+           perform 140-extended-price-calculation.
+           perform 150-discount-calculation.
+           perform 160-tranportation-charge-calculation.
+           perform 170-count-discount-items.
+           perform 180-net-price-calculation.
+           perform 190-count-prices.
+           perform 200-write-detail-line.
+           perform 030-read-input.
+           
+      *open files
+        010-open-files.
+           open input input-file.
+           open output output-file.
 
+      *report heading
+       020-write-headings.
+           write output-line from ws-report-heading
+             after advancing 2 lines.
+
+           write output-line from ws-column-heading
+             after advancing 3 lines.
+
+      *initial read of input file
+       030-read-input.
+
+           read input-file
+               at end
+                   move "y" to ws-eof-flag.
+
+       110-total-calculation.
+           move ws-price-count to ws-total-extended.
+           move ws-net-count to ws-total-net.
+           move ws-charge-count to ws-total-trans-charge.
+
+           write output-line from ws-summary-line
+             after advancing 2 lines.
+
+       120-discount-total.
+           divide ws-discount-count by ws-total-items
+             giving ws-interim rounded.
+           multiply ws-interim by 100
+             giving ws-percent-dicount.
+           move ws-percent-sign-cnst to ws-discount-sign.
+
+           write output-line from ws-overall-discount
+             after advancing 3 lines.
+             
+      * Close files and end program
+       130-close-files.
+           close input-file.
+           close output-file.
+
+       140-extended-price-calculation.
+           multiply il-unit-price by il-quantity
+             giving ws-extended-calc rounded.
+
+       150-discount-calculation.
            if il-product-class = ws-a-class then
                if ws-extended-calc > 100 then
-                   multiply ws-extended-calc by 0.05 giving 
-                   ws-discount-calc
+                   multiply ws-extended-calc by 0.05 giving
+                     ws-discount-calc
                end-if
-           else 
+           else
                if il-product-class = ws-b-class then
                    if ws-extended-calc > 5 then
-                       multiply ws-extended-calc by 0.05 giving 
-                       ws-discount-calc
+                       multiply ws-extended-calc by 0.05 giving
+                         ws-discount-calc
                    end-if
                end-if
            end-if.
 
            if il-product-class = ws-f-class then
                if ws-extended-calc > 50 then
-                   multiply ws-extended-calc by 0.05 giving 
-                   ws-discount-calc
+                   multiply ws-extended-calc by 0.05 giving
+                     ws-discount-calc
                end-if
            end-if.
 
+       160-tranportation-charge-calculation.
+
            if il-product-class = ws-a-class then
                move 12.5 to ws-trans-per-calc
-               multiply ws-extended-calc by 0.125 giving 
-               ws-trans-charge-calc
+               multiply ws-extended-calc by 0.125 giving
+                 ws-trans-charge-calc
            end-if.
 
            if il-product-class = ws-d-class then
                move 8.5 to ws-trans-per-calc
-               multiply ws-extended-calc by 0.085 giving 
-               ws-trans-charge-calc
+               multiply ws-extended-calc by 0.085 giving
+                 ws-trans-charge-calc
            end-if.
 
            if il-product-class = ws-f-class then
@@ -274,9 +319,9 @@
                  ws-trans-charge-calc
            end-if.
 
-           if (il-product-class = ws-b-class) or (il-product-class = 
-           ws-c-class) or (il-product-class = ws-z-class) or 
-           (il-product-class = ws-g-class) then
+           if (il-product-class = ws-b-class) or (il-product-class =
+             ws-c-class) or (il-product-class = ws-z-class) or
+             (il-product-class = ws-g-class) then
                if il-quantity <= 100 then
                    move 6.5 to ws-trans-per-calc
                    multiply ws-extended-calc by 0.065 giving
@@ -284,17 +329,21 @@
                end-if
            end-if.
 
+       170-count-discount-items.
            if ws-discount-calc = 0 then
                add 1 to ws-discount-count
            end-if.
 
-           subtract ws-discount-calc from ws-extended-calc giving 
-           ws-net-price-calc.
+       180-net-price-calculation.
+           subtract ws-discount-calc from ws-extended-calc giving
+             ws-net-price-calc.
 
+       190-count-prices.
            add ws-extended-calc to ws-price-count.
            add ws-net-price-calc to ws-net-count.
            add ws-trans-charge-calc to ws-charge-count.
 
+       200-write-detail-line.
            move spaces to ws-detail-line.
 
            move il-item-number to ws-item-number.
@@ -309,12 +358,7 @@
            move ws-percent-sign-cnst to ws-percent-sign.
            move ws-trans-charge-calc to ws-trans-charge.
 
-
            write output-line from ws-detail-line
              after advancing 2 lines.
-
-           read input-file
-               at end
-                   move "y" to ws-eof-flag.
 
        end program A2-ItemList.
